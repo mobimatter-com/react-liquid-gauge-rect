@@ -62269,7 +62269,7 @@ var LiquidFillGauge = (_temp = _class = function (_PureComponent) {
             var _this2 = this;
 
             var data = [];
-            var samplePoints = 40;
+            var samplePoints = 100;
             for (var i = 0; i <= samplePoints * this.props.waveFrequency; ++i) {
                 data.push({
                     x: i / (samplePoints * this.props.waveFrequency),
@@ -62281,11 +62281,11 @@ var LiquidFillGauge = (_temp = _class = function (_PureComponent) {
 
             var waveHeightScale = (0, _d3Scale.scaleLinear)().range([0, this.props.waveAmplitude, 0]).domain([0, 50, 100]);
 
-            var fillWidth = this.props.width * (this.props.innerRadius - this.props.margin);
-            var waveScaleX = (0, _d3Scale.scaleLinear)().range([-fillWidth, fillWidth]).domain([0, 1]);
+            var fillWidth = this.props.width;
+            var waveScaleX = (0, _d3Scale.scaleLinear)().range([-fillWidth, fillWidth, -fillWidth]).domain([0, 1, 0]);
 
-            var fillHeight = this.props.height * (this.props.innerRadius - this.props.margin);
-            var waveScaleY = (0, _d3Scale.scaleLinear)().range([fillHeight / 2, -fillHeight / 2]).domain([0, 100]);
+            var fillHeight = this.props.height;
+            var waveScaleY = (0, _d3Scale.scaleLinear)().range([fillHeight / 2, -fillHeight / 2]).domain([0, 100, 0]);
 
             if (this.props.waveAnimation) {
                 this.animateWave();
@@ -62295,7 +62295,7 @@ var LiquidFillGauge = (_temp = _class = function (_PureComponent) {
                 var clipArea = (0, _d3Shape.area)().x(function (d, i) {
                     return waveScaleX(d.x);
                 }).y1(function (d) {
-                    return _this2.props.height / 2;
+                    return _this2.props.height;
                 });
                 var timeScale = (0, _d3Scale.scaleLinear)().range([0, 1]).domain([0, this.props.riseAnimationTime]);
                 // Use the old value if available
@@ -62365,13 +62365,14 @@ var LiquidFillGauge = (_temp = _class = function (_PureComponent) {
         value: function animateWave() {
             var _this3 = this;
 
-            var width = this.props.width * (this.props.innerRadius - this.props.margin) / 2;
-            var waveAnimationScale = (0, _d3Scale.scaleLinear)().range([-width, width]).domain([0, 1]);
+            var currT = this.wave.attr('T');
+            var width = this.props.width / 2;
+            var waveAnimationScale = (0, _d3Scale.scaleLinear)().range([-width, width, -width]).domain([0, 1, 0]);
             var easing = 'ease' + ucfirst(this.props.waveAnimationEasing);
             var easingFn = ease[easing] ? ease[easing] : ease.easeLinear;
 
             this.wave.attr('transform', 'translate(' + waveAnimationScale(this.wave.attr('T')) + ', 0)').transition().duration(this.props.waveAnimationTime * (1 - this.wave.attr('T'))).ease(easingFn).attr('transform', 'translate(' + waveAnimationScale(1) + ', 0)').attr('T', '1').on('end', function () {
-                _this3.wave.attr('T', '0');
+                _this3.wave.attr('T', currT);
                 if (_this3.props.waveAnimation) {
                     _this3.animateWave();
                 }
@@ -62387,9 +62388,6 @@ var LiquidFillGauge = (_temp = _class = function (_PureComponent) {
                 id = _props$id === undefined ? (0, _hashid.generate)() : _props$id,
                 style = _props.style;
 
-            var radius = Math.min(this.props.height / 2, this.props.width / 2);
-            var fillCircleRadius = radius * (this.props.innerRadius - this.props.margin);
-            var circle = (0, _d3Shape.arc)().outerRadius(this.props.outerRadius * radius).innerRadius(this.props.innerRadius * radius).startAngle(0).endAngle(Math.PI * 2);
             var cX = this.props.width / 2;
             var cY = this.props.height / 2;
             var fillColor = this.props.waveStyle.fill;
@@ -62456,9 +62454,12 @@ var LiquidFillGauge = (_temp = _class = function (_PureComponent) {
                         _react2.default.createElement(
                             'g',
                             { clipPath: 'url(#clipWave-' + id + ')' },
-                            _react2.default.createElement('circle', _extends({
+                            _react2.default.createElement('rect', _extends({
                                 className: 'wave',
-                                r: fillCircleRadius
+                                height: this.props.height,
+                                width: this.props.width,
+                                x: -1 * this.props.width / 2,
+                                y: -1 * this.props.height / 2
                             }, this.props.waveStyle, {
                                 fill: this.props.gradient ? 'url(#gradient-' + id + ')' : this.props.waveStyle.fill
                             })),
@@ -62474,17 +62475,24 @@ var LiquidFillGauge = (_temp = _class = function (_PureComponent) {
                                 this.props.textRenderer(this.props)
                             )
                         ),
-                        _react2.default.createElement('path', _extends({
-                            className: 'circle',
-                            d: circle()
-                        }, this.props.circleStyle)),
-                        _react2.default.createElement('circle', {
-                            r: radius,
-                            fill: 'rgba(0, 0, 0, 0)',
-                            stroke: 'rgba(0, 0, 0, 0)',
-                            style: { pointerEvents: 'all' },
-                            onClick: this.props.onClick
-                        })
+                        _react2.default.createElement(
+                            'g',
+                            _extends({
+                                className: 'box'
+                            }, this.props.circleStyle),
+                            _react2.default.createElement('rect', {
+                                height: this.props.height,
+                                width: this.props.width,
+                                x: -1 * this.props.width / 2,
+                                y: -1 * this.props.height / 2,
+                                fill: 'transparent',
+                                stroke: '#000000',
+                                strokeLinejoin: 'round',
+                                strokeLinecap: 'round',
+                                style: { pointerEvents: 'all' },
+                                onClick: this.props.onClick
+                            })
+                        )
                     ),
                     _react2.default.createElement(
                         _Gradient2.default,
@@ -62573,8 +62581,8 @@ var LiquidFillGauge = (_temp = _class = function (_PureComponent) {
     // The fill and stroke of the value text when the wave overlaps it.
     waveTextStyle: _propTypes2.default.object
 }, _class.defaultProps = {
-    width: 400,
-    height: 400,
+    width: 100,
+    height: 100,
     value: 0,
     percent: '%',
     textSize: 1,
@@ -62722,10 +62730,10 @@ var Gauge = function Gauge(_ref) {
     }];
 
     return _react2.default.createElement(_src2.default, _extends({}, props, {
-        width: radius * 2,
-        height: radius * 2,
+        width: 250,
+        height: 400,
         value: value,
-        percent: '%',
+        percent: 'MB',
         textSize: 1,
         textOffsetX: 0,
         textOffsetY: 0,
@@ -62738,7 +62746,7 @@ var Gauge = function Gauge(_ref) {
 
             value = Math.round(value);
             var radius = Math.min(height / 2, width / 2);
-            var textPixels = textSize * radius / 2;
+            var textPixels = textSize * radius / 3;
             var valueStyle = {
                 fontSize: textPixels
             };
@@ -62752,19 +62760,20 @@ var Gauge = function Gauge(_ref) {
                 _react2.default.createElement(
                     'tspan',
                     { className: 'value', style: valueStyle },
-                    value
+                    value * 100
                 ),
                 _react2.default.createElement(
                     'tspan',
                     { style: percentStyle },
-                    percent
+                    percent,
+                    ' left'
                 )
             );
         },
         riseAnimation: true,
         waveAnimation: true,
-        waveFrequency: 2,
-        waveAmplitude: 1,
+        waveFrequency: 1,
+        waveAmplitude: 2,
         gradient: true,
         gradientStops: gradientStops,
         circleStyle: {
@@ -62879,4 +62888,4 @@ _reactDom2.default.render(_react2.default.createElement(App, null), document.get
 /***/ })
 
 /******/ });
-//# sourceMappingURL=bundle.js.map?4fcb6bf243610e87207d
+//# sourceMappingURL=bundle.js.map?1b6b9452f19ca000e0a7
