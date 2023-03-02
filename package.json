@@ -1,6 +1,6 @@
 {
-  "name": "react-liquid-gauge",
-  "version": "1.2.4",
+  "name": "react-liquid-gauge-rect",
+  "version": "1.0.0",
   "description": "React Liquid Gauge component",
   "main": "lib/index.js",
   "files": [
@@ -19,22 +19,7 @@
     "coveralls": "tap test/*.js --coverage --coverage-report=text-lcov --nyc-arg=--require --nyc-arg=babel-register --nyc-arg=--require --nyc-arg=babel-polyfill | coveralls",
     "dev": "cd examples; webpack-dev-server --hot --inline --host 0.0.0.0 --port 8000 --content-base ../docs"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/trendmicro-frontend/react-liquid-gauge.git"
-  },
-  "author": "Cheton Wu <cheton@gmail.com>",
-  "contributors": [
-    {
-      "name": "Cheton Wu",
-      "email": "cheton@gmail.com",
-      "url": "https://github.com/cheton"
-    }
-  ],
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/trendmicro-frontend/react-liquid-gauge/issues"
-  },
   "homepage": "https://github.com/trendmicro-frontend/react-liquid-gauge",
   "keywords": [
     "react",

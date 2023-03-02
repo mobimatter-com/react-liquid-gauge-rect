@@ -33,17 +33,17 @@ const Gauge = ({ radius = 200, value = 0, ...props }) => {
     return (
         <LiquidFillGauge
             {...props}
-            width={radius * 2}
-            height={radius * 2}
+            width={250}
+            height={400}
             value={value}
-            percent="%"
+            percent="MB"
             textSize={1}
             textOffsetX={0}
             textOffsetY={0}
             textRenderer={({ value, width, height, textSize, percent }) => {
                 value = Math.round(value);
                 const radius = Math.min(height / 2, width / 2);
-                const textPixels = (textSize * radius / 2);
+                const textPixels = (textSize * radius / 3);
                 const valueStyle = {
                     fontSize: textPixels
                 };
@@ -53,15 +53,15 @@ const Gauge = ({ radius = 200, value = 0, ...props }) => {
 
                 return (
                     <tspan>
-                        <tspan className="value" style={valueStyle}>{value}</tspan>
-                        <tspan style={percentStyle}>{percent}</tspan>
+                        <tspan className="value" style={valueStyle}>{value * 100}</tspan>
+                        <tspan style={percentStyle}>{percent} left</tspan>
                     </tspan>
                 );
             }}
             riseAnimation
             waveAnimation
-            waveFrequency={2}
-            waveAmplitude={1}
+            waveFrequency={1}
+            waveAmplitude={2}
             gradient
             gradientStops={gradientStops}
             circleStyle={{

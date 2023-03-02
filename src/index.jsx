@@ -6,7 +6,7 @@ import * as ease from 'd3-ease';
 import { interpolateNumber } from 'd3-interpolate';
 import { scaleLinear } from 'd3-scale';
 import { select } from 'd3-selection';
-import { arc, area } from 'd3-shape';
+import { area } from 'd3-shape';
 import { timer } from 'd3-timer';
 import './transition-polyfill';
 import { generate } from './hashid';
@@ -96,8 +96,8 @@ class LiquidFillGauge extends PureComponent {
     };
 
     static defaultProps = {
-        width: 400,
-        height: 400,
+        width: 100,
+        height: 100,
         value: 0,
         percent: '%',
         textSize: 1,
@@ -162,7 +162,7 @@ class LiquidFillGauge extends PureComponent {
     }
     draw() {
         const data = [];
-        const samplePoints = 40;
+        const samplePoints = 100;
         for (let i = 0; i <= samplePoints * this.props.waveFrequency; ++i) {
             data.push({
                 x: i / (samplePoints * this.props.waveFrequency),
@@ -178,15 +178,15 @@ class LiquidFillGauge extends PureComponent {
             .range([0, this.props.waveAmplitude, 0])
             .domain([0, 50, 100]);
 
-        const fillWidth = (this.props.width * (this.props.innerRadius - this.props.margin));
+        const fillWidth = (this.props.width);
         const waveScaleX = scaleLinear()
-            .range([-fillWidth, fillWidth])
-            .domain([0, 1]);
+            .range([-fillWidth, fillWidth, -fillWidth])
+            .domain([0, 1, 0]);
 
-        const fillHeight = (this.props.height * (this.props.innerRadius - this.props.margin));
+        const fillHeight = (this.props.height);
         const waveScaleY = scaleLinear()
             .range([fillHeight / 2, -fillHeight / 2])
-            .domain([0, 100]);
+            .domain([0, 100, 0]);
 
         if (this.props.waveAnimation) {
             this.animateWave();
@@ -195,7 +195,7 @@ class LiquidFillGauge extends PureComponent {
         if (this.props.riseAnimation) {
             const clipArea = area()
                 .x((d, i) => waveScaleX(d.x))
-                .y1(d => (this.props.height / 2));
+                .y1(d => (this.props.height));
             const timeScale = scaleLinear()
                 .range([0, 1])
                 .domain([0, this.props.riseAnimationTime]);
@@ -267,10 +267,11 @@ class LiquidFillGauge extends PureComponent {
         }
     }
     animateWave() {
-        const width = (this.props.width * (this.props.innerRadius - this.props.margin)) / 2;
+        const currT = this.wave.attr('T');
+        const width = this.props.width / 2;
         const waveAnimationScale = scaleLinear()
-            .range([-width, width])
-            .domain([0, 1]);
+            .range([-width, width, -width])
+            .domain([0, 1, 0]);
         const easing = `ease${ucfirst(this.props.waveAnimationEasing)}`;
         const easingFn = ease[easing] ? ease[easing] : ease.easeLinear;
 
@@ -282,7 +283,7 @@ class LiquidFillGauge extends PureComponent {
             .attr('transform', 'translate(' + waveAnimationScale(1) + ', 0)')
             .attr('T', '1')
             .on('end', () => {
-                this.wave.attr('T', '0');
+                this.wave.attr('T', currT);
                 if (this.props.waveAnimation) {
                     this.animateWave();
                 }
@@ -293,13 +294,6 @@ class LiquidFillGauge extends PureComponent {
             id = generate(),
             style
         } = this.props;
-        const radius = Math.min(this.props.height / 2, this.props.width / 2);
-        const fillCircleRadius = radius * (this.props.innerRadius - this.props.margin);
-        const circle = arc()
-            .outerRadius(this.props.outerRadius * radius)
-            .innerRadius(this.props.innerRadius * radius)
-            .startAngle(0)
-            .endAngle(Math.PI * 2);
         const cX = (this.props.width / 2);
         const cY = (this.props.height / 2);
         const fillColor = this.props.waveStyle.fill;
@@ -359,9 +353,12 @@ class LiquidFillGauge extends PureComponent {
                             {this.props.textRenderer(this.props)}
                         </text>
                         <g clipPath={`url(#clipWave-${id})`}>
-                            <circle
+                            <rect
                                 className="wave"
-                                r={fillCircleRadius}
+                                height={this.props.height}
+                                width={this.props.width}
+                                x={-1 * this.props.width / 2 }
+                                y={-1 * this.props.height / 2}
                                 {...this.props.waveStyle}
                                 fill={this.props.gradient ? `url(#gradient-${id})` : this.props.waveStyle.fill}
                             />
@@ -376,18 +373,23 @@ class LiquidFillGauge extends PureComponent {
                                 {this.props.textRenderer(this.props)}
                             </text>
                         </g>
-                        <path
-                            className="circle"
-                            d={circle()}
+                        <g
+                            className="box"
                             {...this.props.circleStyle}
-                        />
-                        <circle
-                            r={radius}
-                            fill="rgba(0, 0, 0, 0)"
-                            stroke="rgba(0, 0, 0, 0)"
+                        >
+                        <rect
+                            height={this.props.height}
+                            width={this.props.width}
+                            x={-1 * this.props.width / 2 }
+                            y={-1 * this.props.height / 2}
+                            fill="transparent"
+                            stroke="#000000"
+                            strokeLinejoin="round"
+                            strokeLinecap="round"
                             style={{ pointerEvents: 'all' }}
                             onClick={this.props.onClick}
                         />
+                        </g>
                     </g>
                     <Gradient id={`gradient-${id}`}>
                         {gradientStops.map((stop, index) => {
